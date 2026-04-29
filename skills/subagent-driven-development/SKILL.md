@@ -109,7 +109,19 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 
 **NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch.
 
-**BLOCKED:** The implementer cannot complete the task. Assess the blocker:
+**BLOCKED:** The implementer cannot complete the task. Before assessing the blocker, **enforce verbatim error reporting
+**:
+
+- The implementer subagent MUST quote the verbatim error string from the failed tool call (or explicitly say "no error
+  string visible — only blocked status" if none was returned).
+- The implementer MUST NOT name a specific hook, validator, or system as the cause of the denial unless the verbatim
+  error string contains direct evidence (e.g., the hook's name, a unique error format, or a recognizable signature).
+- The controller MUST cross-check any attributed cause against the verbatim error string before acting on it. If the
+  attribution doesn't match the error string, treat the cause as **unknown** and re-investigate from the error text, not
+  from the attribution.
+
+Once the verbatim error is captured, assess the blocker:
+
 1. If it's a context problem, provide more context and re-dispatch with the same model
 2. If the task requires more reasoning, re-dispatch with a more capable model
 3. If the task is too large, break it into smaller pieces
@@ -246,6 +258,8 @@ Done!
 - Let implementer self-review replace actual review (both are needed)
 - **Start code quality review before spec compliance is ✅** (wrong order)
 - Move to next task while either review has open issues
+- Accept implementer status reports that name a specific hook/validator/system as the denial cause without a verbatim
+  error-string quote — that is **unverified attribution**; treat as unknown until the error text is read directly
 
 **If subagent asks questions:**
 - Answer clearly and completely
