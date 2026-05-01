@@ -22,9 +22,23 @@ Write the test first. Watch it fail. Write minimal code to pass.
 - Behavior changes
 
 **Exceptions (ask your human partner):**
-- Throwaway prototypes
-- Generated code
-- Configuration files
+
+- Throwaway prototypes (will be deleted, not extended)
+- Generated code (no hand-edits expected)
+- Configuration files: **pure declarations only** — `pyproject.toml`, `settings.py`, fixture data, generated stubs.
+  Anything that runs.
+
+**Objective decision rule (not vibes):** If the file you are about to write has any of the following, it is production
+code — TDD applies:
+
+- A `main()` / `if __name__ == "__main__"` / CLI entrypoint
+- An `__init__.py` that does anything beyond re-exports
+- Imports of project code that get _called_ at runtime (not just type-hinted)
+- Exported functions, classes, or constants that other code will rely on
+- Any executable behavior beyond pure data declarations
+
+A "thin orchestrator over an already-tested core" is **still production code** if it has any of the above. The size of
+the file is not the gate; the question is whether running it does anything observable.
 
 Thinking "skip TDD just this once"? Stop. That's rationalization.
 
