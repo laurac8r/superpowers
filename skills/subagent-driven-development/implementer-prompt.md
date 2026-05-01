@@ -65,6 +65,22 @@ Task tool (general-purpose):
     - You feel uncertain about whether your approach is correct
     - The task involves restructuring existing code in ways the plan didn't anticipate
     - You've been reading file after file trying to understand the system without progress
+    - **The test environment cannot accommodate the spec-prescribed implementation**
+      (e.g., async-pipeline rethrow, Flutter binding not initialized in test(),
+      network unavailable, sandbox-restricted permissions). BLOCK and ask how to
+      fix the test harness — do NOT adapt the production code to fit
+      test-environment constraints. Tests passing on a non-spec-compliant
+      production change is a strictly worse outcome than tests failing on a
+      spec-compliant production change you can debug together.
+
+    **Common rationalizations to reject:**
+
+    | Excuse                                                                                                                                    | Reality                                                                                                                                                                                                                                                                                                    |
+    |-------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+    | "The test's permissive matcher (`contains('X')`, `isNotNull`, `isA<…>`) passes with my swapped implementation, so the spec is satisfied." | Permissive matchers admit non-compliant implementations. The spec's words are the contract, not the matcher's tolerance. If the tests are weak, BLOCK and propose tightening them — don't exploit their permissiveness to ship spec-violating code.                                                        |
+    | "The runtime will work because *some other call site* registers / loads / configures the API I bypassed."                                 | That assumption is fragile. Verify the call site (a) currently exists, (b) is on the hot path that exercises this code, and (c) won't be removed by another sub-task in the same PR series. If you can't verify all three, the runtime claim is unfalsifiable speculation. BLOCK.                          |
+    | "The spec said API X but I used API Y because Y produces the same string/value as X at runtime."                                          | Two APIs that produce equal outputs in *one* environment can diverge in another (test vs prod, web vs mobile, online vs offline). The spec named API X for a reason — usually a side effect (registration, caching, instrumentation) that string-equality doesn't capture. BLOCK and surface the friction. |
+    | "Tests pass + analyzer clean = the work is done."                                                                                         | Tests pass + analyzer clean = the *visible signals* are clean. They are not a substitute for spec compliance. If the spec said API X and you used API Y, the work is not done — even if every other check is green.                                                                                        |
 
     **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
     specifically what you're stuck on, what you've tried, and what kind of help you need.
