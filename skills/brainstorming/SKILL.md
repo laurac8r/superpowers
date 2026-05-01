@@ -63,7 +63,10 @@ digraph brainstorming {
 }
 ```
 
-**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
+**The default terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other
+implementation skill. The ONLY skill you invoke after brainstorming is writing-plans — **unless the operator has
+explicitly directed a pause after design approval**. See _Operator override: defer plan to follow-up session_ below for
+the alternate terminal state.
 
 ## The Process
 
@@ -135,6 +138,32 @@ Wait for the user's response. If they request changes, make them and re-run the 
 - Invoke the writing-plans skill to create a detailed implementation plan
 - Do NOT invoke any other skill. writing-plans is the next step.
 
+### Operator override: defer plan to follow-up session
+
+If the operator explicitly directs a pause AFTER design approval but BEFORE plan-writing ("leave implementation for a
+follow-up session", "don't write plans yet", "stop at the design gate", "explore only", "do not fix yet", "brainstorm
+approaches, don't edit code", or similar), honor that directive. Do **NOT** invoke writing-plans silently against the
+pause.
+
+Under operator defer, the alternate terminal state is:
+
+1. The design artifact (spec doc, `/visual-aid`, approved prose) IS the session's deliverable. If the operator named a
+   specific output format (e.g., `/visual-aid`), use that instead of the default `docs/superpowers/specs/…-design.md`
+   location.
+2. Invoke `checkpoint-save` and `remember` so the follow-up session can pick up via `/checkpoint-resume`. The next
+   session invokes `writing-plans` as the first implementation step — the gate is deferred, not dropped.
+3. The HARD-GATE on "no implementation until design approved" still fires. Operator defer only postpones the
+   writing-plans step; it does not authorize unapproved implementation work in the same session.
+
+**Rationalization counter:**
+
+| Excuse                                                                  | Reality                                                                                                                                                                                                                                                                 |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "The skill says writing-plans is the ONLY terminal state"               | That's the default path. An explicit operator directive to defer is a recognized override; the design artifact + checkpoint is the alternate terminal state. Silently invoking writing-plans against the operator's stated pause violates the directive, not the skill. |
+| "checkpoint-save + remember substitutes for writing-plans every time"   | No. They are ONLY the alternate terminal state under operator defer. In the default flow, checkpoint-save is not a substitute for writing-plans.                                                                                                                        |
+| "I'll write a quick plan since the user will need one eventually"       | Under defer, the follow-up session invokes writing-plans as step one. Pre-writing it here forks the artifact and violates the operator's explicit pause.                                                                                                                |
+| "The default location `docs/superpowers/specs/…-design.md` is required" | Under defer, if the operator named a different output format (e.g., `/visual-aid`, `~/.visual-aid/…html`), that overrides the default location. Line 154 already allows user-preference overrides on spec location.                                                     |
+
 ## Key Principles
 
 - **One question at a time** - Don't overwhelm with multiple questions
@@ -146,19 +175,30 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 ## Visual Companion
 
-A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question goes through the browser.
+A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool —
+not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT
+mean every question goes through the browser.
 
-**Offering the companion:** When you anticipate that upcoming questions will involve visual content (mockups, layouts, diagrams), offer it once for consent:
-> "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. This feature is still new and can be token-intensive. Want to try it? (Requires opening a local URL)"
+**Offering the companion:** When you anticipate that upcoming questions will involve visual content (mockups, layouts,
+diagrams), offer it once for consent:
 
-**This offer MUST be its own message.** Do not combine it with clarifying questions, context summaries, or any other content. The message should contain ONLY the offer above and nothing else. Wait for the user's response before continuing. If they decline, proceed with text-only brainstorming.
+> "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together
+> mockups, diagrams, comparisons, and other visuals as we go. This feature is still new and can be token-intensive. Want
+> to try it? (Requires opening a local URL)"
 
-**Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or the terminal. The test: **would the user understand this better by seeing it than reading it?**
+**This offer MUST be its own message.** Do not combine it with clarifying questions, context summaries, or any other
+content. The message should contain ONLY the offer above and nothing else. Wait for the user's response before
+continuing. If they decline, proceed with text-only brainstorming.
 
-- **Use the browser** for content that IS visual — mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
-- **Use the terminal** for content that is text — requirements questions, conceptual choices, tradeoff lists, A/B/C/D text options, scope decisions
+**Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or the
+terminal. The test: **would the user understand this better by seeing it than reading it?**
 
-A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use the browser.
+- **Use the browser** for content that IS visual — mockups, wireframes, layout comparisons, architecture diagrams,
+  side-by-side visual designs
+- **Use the terminal** for content that is text — requirements questions, conceptual choices, tradeoff lists, A/B/C/D
+  text options, scope decisions
 
-If they agree to the companion, read the detailed guide before proceeding:
-`skills/brainstorming/visual-companion.md`
+A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a
+conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use the browser.
+
+If they agree to the companion, read the detailed guide before proceeding: `skills/brainstorming/visual-companion.md`
